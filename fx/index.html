@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="FX">
+<meta name="theme-color" content="#f4f6f5">
+<title>FX Converter</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<style>
+:root{--bg:#f4f6f5;--card:#fff;--ink:#0e1b26;--mut:#6b7780;--line:#e6eae8;--acc:#0a7c66;--accS:#dff3ec;--chip:#eef1ef}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{background:var(--bg)}
+body{color:var(--ink);font-family:Inter,-apple-system,system-ui,sans-serif;max-width:480px;margin:0 auto;
+ padding:calc(env(safe-area-inset-top) + 8px) 16px calc(env(safe-area-inset-bottom) + 32px)}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.ttl{font-weight:800;font-size:17px;letter-spacing:-.02em}
+.iconbtn{width:36px;height:36px;border-radius:50%;border:0;background:var(--card);display:grid;place-items:center;box-shadow:0 1px 2px rgba(0,0,0,.06)}
+.iconbtn svg{width:20px;height:20px;stroke:var(--ink)}
+
+.card{background:var(--card);border-radius:22px;box-shadow:0 1px 3px rgba(14,27,38,.05)}
+.send{padding:12px 16px 14px}
+.lbl{font-size:13px;color:var(--mut);font-weight:500;margin-bottom:4px}
+.sendrow{display:flex;align-items:center;gap:10px}
+.sendrow input{flex:1;min-width:0;border:0;outline:0;background:none;font:inherit;font-size:34px;font-weight:700;letter-spacing:-.03em;color:var(--ink)}
+.sendrow input::placeholder{color:#c4cbc8}
+.pill{display:flex;align-items:center;gap:8px;background:var(--chip);border:0;border-radius:999px;padding:7px 12px 7px 7px;font:inherit;font-weight:700;font-size:16px;color:var(--ink)}
+.flag{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:19px;background:#fff;overflow:hidden;flex-shrink:0}
+.clr{width:30px;height:30px;border-radius:50%;border:0;background:var(--chip);display:none;place-items:center;flex-shrink:0}
+.clr.on{display:grid}
+.clr svg{width:14px;height:14px;stroke:var(--mut)}
+.pill svg{width:14px;height:14px;stroke:var(--ink)}
+
+.chips{display:flex;gap:8px;margin:10px 0 0;overflow-x:auto;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chips button{border:0;background:var(--chip);border-radius:999px;padding:8px 14px;font:inherit;font-size:14px;font-weight:600;color:var(--ink);white-space:nowrap}
+.chips button:active{background:var(--accS)}
+
+.ratebar{display:flex;align-items:center;gap:8px;margin:10px 4px;font-size:13px;color:var(--mut);font-weight:500}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--acc);box-shadow:0 0 0 4px var(--accS)}
+
+.list{padding:4px 0}
+.item{display:flex;align-items:center;gap:12px;padding:11px 16px;position:relative;cursor:pointer}
+.item+.item::before{content:"";position:absolute;top:0;left:66px;right:18px;height:1px;background:var(--line)}
+.item .flag{width:36px;height:36px;font-size:23px;background:var(--chip)}
+.meta{flex:1;min-width:0}
+.code{font-weight:700;font-size:16px}
+.name{font-size:13px;color:var(--mut);margin-top:2px}
+.amt{text-align:right}
+.big{font-size:21px;font-weight:700;letter-spacing:-.02em;word-break:break-all}
+.sub{font-size:12px;color:var(--mut);margin-top:2px}
+.item:active{background:#fafbfa}
+
+.foot{text-align:center;font-size:12px;color:var(--mut);margin-top:16px;line-height:1.5}
+
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 24px);transform:translate(-50%,20px);opacity:0;
+ background:var(--ink);color:#fff;padding:10px 18px;border-radius:999px;font-size:14px;font-weight:600;transition:.25s;pointer-events:none}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+.scrim{position:fixed;inset:0;background:rgba(14,27,38,.4);opacity:0;pointer-events:none;transition:.25s}
+.sheet{position:fixed;left:0;right:0;bottom:0;max-width:480px;margin:0 auto;background:var(--card);border-radius:26px 26px 0 0;
+ padding:10px 20px calc(env(safe-area-inset-bottom) + 24px);transform:translateY(100%);transition:.3s cubic-bezier(.2,.8,.2,1)}
+.open .scrim{opacity:1;pointer-events:auto}.open .sheet{transform:none}
+.grab{width:40px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 16px}
+.sheet h2{font-size:22px;font-weight:800;letter-spacing:-.02em;margin-bottom:4px}
+.sheet p{font-size:13px;color:var(--mut);margin-bottom:16px}
+.rrow{display:flex;align-items:center;gap:12px;padding:10px 0}
+.rrow .flag{background:var(--chip)}
+.rrow span{flex:1;font-weight:600}
+.rrow input{width:130px;border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;font:inherit;font-size:16px;font-weight:600;text-align:right;outline:0;color:var(--ink)}
+.rrow input:focus{border-color:var(--acc)}
+.btns{display:flex;gap:10px;margin-top:18px}
+.btn{flex:1;border:0;border-radius:999px;padding:14px;font:inherit;font-weight:700;font-size:16px}
+.btn.pri{background:var(--acc);color:#fff}.btn.sec{background:var(--chip);color:var(--ink)}
+</style>
+</head>
+<body>
+<header>
+  <span class="ttl">Convert</span>
+  <button class="iconbtn" id="openRates" aria-label="Rates"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></button>
+</header>
+
+
+<div class="card send">
+  <div class="lbl">You have</div>
+  <div class="sendrow">
+    <input id="amt" type="text" inputmode="decimal" enterkeyhint="done" placeholder="0" autocomplete="off">
+    <button class="clr" id="clr" aria-label="Clear"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <button class="pill" id="swap"><span class="flag" id="fFlag">🇺🇸</span><span id="fCode">USD</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><path d="M7 4v16M7 20l-3-3M7 20l3-3M17 20V4M17 4l-3 3M17 4l3 3"/></svg></button>
+  </div>
+  <div class="chips" id="chips"></div>
+</div>
+
+<div class="ratebar"><span class="dot"></span><span id="rateTxt"></span></div>
+
+<div class="card list" id="out"></div>
+
+<div class="foot">Tap any amount to copy · Rates updated <span id="upd"></span></div>
+
+<div class="toast" id="toast">Copied</div>
+
+<div id="sheetWrap">
+  <div class="scrim" id="scrim"></div>
+  <div class="sheet">
+    <div class="grab"></div>
+    <h2>Exchange rates</h2>
+    <p>Value of 1 US Dollar. Set these to your money changer's rates — saved on this phone.</p>
+    <div class="rrow"><div class="flag">🇰🇭</div><span>KHR</span><input id="rKHR" inputmode="decimal"></div>
+    <div class="rrow"><div class="flag">🇻🇳</div><span>VND</span><input id="rVND" inputmode="decimal"></div>
+    <div class="rrow"><div class="flag">🇳🇵</div><span>NPR</span><input id="rNPR" inputmode="decimal"></div>
+    <div class="btns"><button class="btn sec" id="reset">Reset</button><button class="btn pri" id="done">Done</button></div>
+  </div>
+</div>
+
+<script>
+const DEF={KHR:4000,VND:26270,NPR:151},DEF_DATE="8 Nov 2026";
+const INFO={USD:["US Dollar","🇺🇸",2,"$"],KHR:["Cambodian Riel","🇰🇭",0,"៛"],VND:["Vietnamese Dong","🇻🇳",0,"₫"],NPR:["Nepali Rupee","🇳🇵",2,"Rs"]};
+const CHIPS={USD:[1,5,10,20,50,100],KHR:[1000,5000,10000,20000,50000,100000]};
+let rates={...DEF},from="USD",upd=DEF_DATE;
+const $=id=>document.getElementById(id);
+const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+try{const s=JSON.parse(store.get("fxRates"));if(s)rates={...DEF,...s}}catch(e){}
+from=store.get("fxFrom")||"USD";upd=store.get("fxUpd")||DEF_DATE;
+const fmt=(n,d)=>n.toLocaleString("en-US",{minimumFractionDigits:d,maximumFractionDigits:d});
+
+function render(){
+  $("clr").classList.toggle("on",!!$("amt").value);
+  $("fFlag").textContent=INFO[from][1];$("fCode").textContent=from;
+  $("chips").innerHTML=CHIPS[from].map(v=>`<button data-v="${v}">${INFO[from][3]}${fmt(v,0)}</button>`).join("");
+  $("rateTxt").textContent=from==="USD"?`1 USD = ${fmt(rates.KHR,0)} KHR`:`${fmt(rates.KHR,0)} KHR = 1 USD`;
+  $("upd").textContent=upd;
+  const a=parseFloat($("amt").value.replace(/,/g,""))||0;
+  const usd=from==="USD"?a:a/rates.KHR;
+  const t=[from==="USD"?"KHR":"USD","VND","NPR"];
+  $("out").innerHTML=t.map(c=>{
+    const v=c==="USD"?usd:usd*rates[c];
+    const per=c==="USD"?`1 USD = ${fmt(rates.KHR,0)} KHR`:`1 USD = ${fmt(rates[c],c==="NPR"?2:0)}`;
+    return `<div class="item" data-c="${c}" data-v="${fmt(v,INFO[c][2])}"><div class="flag">${INFO[c][1]}</div>
+      <div class="meta"><div class="code">${c}</div><div class="name">${INFO[c][0]}</div></div>
+      <div class="amt"><div class="big">${INFO[c][3]} ${fmt(v,INFO[c][2])}</div><div class="sub">${per}</div></div></div>`;
+  }).join("");
+}
+function save(){store.set("fxRates",JSON.stringify(rates));store.set("fxFrom",from);store.set("fxUpd",upd)}
+function toast(m){const t=$("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove("show"),1400)}
+function fillRates(){["KHR","VND","NPR"].forEach(c=>$("r"+c).value=rates[c])}
+
+$("amt").addEventListener("input",e=>{
+  const raw=e.target.value.replace(/[^0-9.]/g,"").replace(/(\..*)\./g,"$1");
+  const [i,d]=raw.split(".");e.target.value=(i?Number(i).toLocaleString("en-US"):"")+(d!==undefined?"."+d:"");
+  render();
+});
+$("amt").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();e.target.blur()}});
+$("clr").addEventListener("pointerdown",e=>e.preventDefault());
+$("clr").onclick=()=>{$("amt").value="";render();$("amt").focus()};
+$("swap").onclick=()=>{
+  const a=parseFloat($("amt").value.replace(/,/g,""));
+  const old=from;from=from==="USD"?"KHR":"USD";
+  if(a){const v=old==="USD"?a*rates.KHR:a/rates.KHR;$("amt").value=fmt(v,INFO[from][2]).replace(/\.00$/,"")}
+  save();render();
+};
+$("chips").onclick=e=>{const v=e.target.dataset.v;if(v){$("amt").value=fmt(+v,0);render()}};
+$("out").onclick=async e=>{const it=e.target.closest(".item");if(!it)return;
+  try{await navigator.clipboard.writeText(it.dataset.v);toast(`Copied ${it.dataset.v} ${it.dataset.c}`)}catch(_){toast("Couldn't copy")}};
+const open=v=>{document.body.classList.toggle("open",v);$("sheetWrap").classList.toggle("open",v)};
+$("openRates").onclick=()=>{fillRates();open(true)};
+$("scrim").onclick=$("done").onclick=()=>open(false);
+["KHR","VND","NPR"].forEach(c=>$("r"+c).oninput=e=>{const v=parseFloat(e.target.value);if(v>0){rates[c]=v;upd=new Date().toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"});save();render()}});
+$("reset").onclick=()=>{rates={...DEF};upd=DEF_DATE;save();fillRates();render();toast("Rates reset")};
+render();
+</script>
+</body>
+</html>
